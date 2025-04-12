@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <h2>💬 Live Chat</h2>
+        <div id="chat-box" class="chat-box"></div>
+        <form id="chat-form">
+          <input type="text" id="message-input" autocomplete="off" placeholder="Type a message..." required />
+          <button type="submit">Send</button>
+        </form>
+      </div>  
+      <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
+
+      <script>
+        var socket = io() 
+
+        const userId = Math.floor(1000 + Math.random() *1000)
+        var chatBox = document.getElementById('message-input');
+        var chatForm = document.getElementById('chat-form');
+        var chatBoxContainer = document.getElementById('chat-box');
+
+        chatForm.addEventListener('submit',(event)=>{
+            event.preventDefault();
+            var message = chatBox.value;
+            if(message){
+                socket.emit('message', {
+                    userId: userId,
+                    message: message
+                });
+                chatBox.value = '';
+            }
+        })
+
+        socket.on('broadcastMessage', ({ userId: senderId, text }) => {
+            const bubble = document.createElement('div');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // If same sender, mark as from-user
+      bubble.classList.add('message-bubble', senderId === userId ? 'from-user' : 'from-other');
+
+      bubble.innerHTML = `
+          <span class="message-text">${text}</span>
+          <span class="message-time">${time}</span>
+      `;
+      chatBoxContainer.appendChild(bubble);
+      chatBoxContainer.scrollTop = chatBoxContainer.scrollHeight;
+});
+
+      </script>
+</body>
+</html>
+
